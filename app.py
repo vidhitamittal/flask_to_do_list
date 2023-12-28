@@ -1,10 +1,18 @@
-from flask import Flask, render_template, url_for, request, redirect
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, logout_user,login_required
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'f05f31fd-b1e3-43d3-a594-0fbc3862ef1d'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -13,20 +21,44 @@ class Todo(db.Model):
 
     def __repr__(self):
         return '<Task %r>' % self.id
+    
 
-@app.route('/', methods=['POST', 'GET'])
+class User(db.Model):
+    user_id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(250), unique=True, nullable=False)
+    password = db.Column(db.String(250),nullable=False)
+    date_created = db.Column(db.DateTime, default = datetime.utcnow)
+    is_active = db.Column(db.Boolean , default = True)
+    is_authenticated = db.Column(db.Boolean , default = True)
+    is_anonymous = db.Column(db.Boolean , default = False)
+
+    def __repr__(self):
+        return '<User %r>' % self.user_id
+    
+    def get_id(self):
+        return self.user_id
+
+@login_manager.user_loader
+def loader_user(user_id):
+    return User.query.get(user_id)
+
+
+@app.route("/")
+def home():
+	return render_template('home.html')
+
+@app.route('/index', methods=['POST', 'GET'])
+@login_required
 def index():
     if request.method == 'POST':
         task_content = request.form['content']
-        new_task = Todo(content=task_content)
-
+        new_task=Todo(content=task_content)
         try:
             db.session.add(new_task)
             db.session.commit()
-            return redirect('/')
+            return redirect('/index')
         except:
             return 'there was an issue adding your task'
-    
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
         return render_template('index.html' , tasks=tasks)
@@ -38,11 +70,12 @@ def delete(id):
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/')
+        return redirect('/index')
     except:
         return "your task could not be deleted"
     
 @app.route('/update/<int:id>', methods=['POST','GET'])
+@login_required
 def update(id):
     task = Todo.query.get_or_404(id)
    
@@ -51,13 +84,48 @@ def update(id):
     
         try:
             db.session.commit()
-            return redirect('/')
+            return redirect('/index')
         except:
             return "task could not be updated"
 
     else: 
         return render_template('update.html' , task=task)
-        
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username=request.form['username']
+        password=request.form['password']
+        new_user=User(username=username,password=password)
+
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect('/login')
+        except:
+            return "cant validate"
+
+    else: 
+	    return render_template('signup.html')
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        try:
+            user = User.query.filter_by(username=request.form['username']).one()
+            if user.password == request.form['password']:
+                login_user(user)
+                return redirect('/index')
+        except:
+            return "User not registered. Make an account first!"
+            
+    return render_template('login.html')
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect('/')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
