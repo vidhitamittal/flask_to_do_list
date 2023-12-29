@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_user, logout_user,login_required
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'f05f31fd-b1e3-43d3-a594-0fbc3862ef1d'
@@ -15,10 +15,11 @@ with app.app_context():
 
 
 class Todo(db.Model):
+    user_id = db.Column(db.Integer, nullable = False)
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
-
+    
     def __repr__(self):
         return '<Task %r>' % self.id
     
@@ -52,7 +53,7 @@ def home():
 def index():
     if request.method == 'POST':
         task_content = request.form['content']
-        new_task=Todo(content=task_content)
+        new_task=Todo(content=task_content, user_id = current_user.get_id())
         try:
             db.session.add(new_task)
             db.session.commit()
@@ -60,10 +61,11 @@ def index():
         except:
             return 'there was an issue adding your task'
     else:
-        tasks = Todo.query.order_by(Todo.date_created).all()
+        tasks = Todo.query.filter_by(user_id = current_user.get_id()).all()
         return render_template('index.html' , tasks=tasks)
 
 @app.route('/delete/<int:id>')
+@login_required
 def delete(id):
     task_to_delete = Todo.query.get_or_404(id)
 
