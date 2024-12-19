@@ -34,8 +34,12 @@
     <div class="form">
         <form action="/index" method="POST">
             <input type="text" name="content" id="content" placeholder="Enter new task" required>
-            <input type="file" id="imageUpload" name="imageUpload" accept="image/*" onchange="loadFile(event)"> 
             <input type="submit" value="Add Task">
+            <h1>Upload an Image</h1>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*">
+                <button type="submit">Upload</button>
+            </form>
         </form>
     </div>
 </div>
