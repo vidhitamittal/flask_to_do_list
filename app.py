@@ -92,7 +92,7 @@ def update(id):
 
     else: 
         return render_template('update.html' , task=task)
-
+        
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -105,7 +105,7 @@ def register():
             db.session.commit()
             return redirect('/login')
         except:
-            return "cant validate"
+            return render_template('alreadyRegistered.html') #user already registered
 
     else: 
 	    return render_template('signup.html')
@@ -118,8 +118,10 @@ def login():
             if user.password == request.form['password']:
                 login_user(user)
                 return redirect('/index')
+            else:
+                return render_template('wrongPassword.html')
         except:
-            return "User not registered. Make an account first!"
+            return render_template('unregistered.html')
             
     return render_template('login.html')
 

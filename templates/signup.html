@@ -5,23 +5,22 @@
 {% endblock %}
 
 {% block body %}
-<div class="container">
-    <nav>
-        <ul>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Create account</a></li>
-        </ul>
-    </nav>
-    <div class="content">
-        <h1>Create an account</h1>
-        <form action="#" method="post">
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="username" required>
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password" required>
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+<div class="content">
+    <h1 align="center">Create an account</h1>        
 </div>
+<br>
+
+<form action="#" method="post" align= "center">
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username" required>
+    <br>
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required>
+    <br>
+    <br>
+    <button type="submit">Submit</button>
+</form>
+
 {% endblock %}
 

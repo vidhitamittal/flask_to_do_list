@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Times New Roman", Times, serif;
     background-color: #f4f7f6;
     margin: 0;
     padding: 0;
@@ -35,10 +35,14 @@ nav ul li a:hover {
 
 .content {
     padding: 20px;
+    position: absolute;  
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 h1 {
-    color: #333;
+    color: white;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -87,3 +91,4 @@ table th, table td {
 table th {
     background-color: #f2f2f2;
 }
+
