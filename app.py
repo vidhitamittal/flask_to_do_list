@@ -18,6 +18,8 @@ with app.app_context():
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 class Todo(db.Model):
@@ -25,6 +27,7 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
+    image = db.Column(db.String(300), nullable=True)
     
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -45,6 +48,9 @@ class User(db.Model):
     def get_id(self):
         return self.user_id
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @login_manager.user_loader
 def loader_user(user_id):
     return User.query.get(user_id)
@@ -59,16 +65,23 @@ def home():
 def index():
     if request.method == 'POST':
         task_content = request.form['content']
-        new_task=Todo(content=task_content, user_id = current_user.get_id())
+        image_file = request.files['image']
+        if not image_file or not image_file.filename:  
+            return render_template('index.html', message="No selected file")
+        filename = secure_filename(image_file.filename)
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image_file.save(image_path)
+        new_task = Todo(content=task_content, image=image_path, user_id=current_user.get_id())
         try:
             db.session.add(new_task)
             db.session.commit()
             return redirect('/index')
-        except:
-            return 'there was an issue adding your task'
+        except Exception as e:
+            print(e)  # Log the error for debugging
+            return 'There was an issue adding your task'
     else:
-        tasks = Todo.query.filter_by(user_id = current_user.get_id()).all()
-        return render_template('index.html' , tasks=tasks)
+        tasks = Todo.query.filter_by(user_id=current_user.get_id()).all()
+        return render_template('index.html', tasks=tasks)
 
 @app.route('/delete/<int:id>')
 @login_required
@@ -135,20 +148,6 @@ def login():
 def logout():
     logout_user()
     return redirect('/')
-
-@app.route("/upload", methods=["POST"])
-def upload_image():
-    if 'image' not in request.files:
-        return render_template('index.html', message="No file part")
-    file = request.files['image']
-    if not file or not file.filename:  
-        return render_template('index.html', message="No selected file")
-    filename = secure_filename(file.filename)
-    if not filename:  
-        return render_template('index.html', message="Invalid file name")
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
-    return render_template('display.html', image_url=file_path)
 
 if __name__ == "__main__":
     app.run(debug=True)
