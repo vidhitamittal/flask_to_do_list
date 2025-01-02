@@ -19,7 +19,9 @@
         </tr>
         {% for task in tasks %}
         <tr>
-            <td style="padding: 10px; border: 1px solid #ddd;">{{ task.content }}</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">
+                <a href="/display/{{task.id}}" style="color: #0277d6; text-decoration: none;">{{ task.content }}</a>
+            </td>
             <td style="padding: 10px; border: 1px solid #ddd;">{{ task.date_created.date() }}</td>
             <td style="padding: 10px; border: 1px solid #ddd;">
                 <a href="/delete/{{task.id}}" style="color: #6902d6; text-decoration: none;">Delete</a>
@@ -35,6 +37,13 @@
         <form action="/index" method="POST">
             <input type="text" name="content" id="content" placeholder="Enter new task" required>
             <input type="submit" value="Add Task">
+        </form>
+    </div>
+    <h3>Upload an Image</h3>
+    <div class="form">
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*">
+            <button type="submit">Upload</button>
         </form>
     </div>
 </div>

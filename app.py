@@ -1,7 +1,10 @@
+from asyncio import current_task
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'f05f31fd-b1e3-43d3-a594-0fbc3862ef1d'
@@ -13,6 +16,9 @@ login_manager.init_app(app)
 with app.app_context():
     db.create_all()
 
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 class Todo(db.Model):
     user_id = db.Column(db.Integer, nullable = False)
@@ -76,6 +82,15 @@ def delete(id):
     except:
         return "your task could not be deleted"
     
+@app.route('/display/<int:id>')
+@login_required
+def display(id):
+    try:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.get_id()) + "_" + str(id) + ".jpg")
+        return render_template('display.html', image_url=file_path)
+    except: 
+        return "there is a problem with the image"
+    
 @app.route('/update/<int:id>', methods=['POST','GET'])
 @login_required
 def update(id):
@@ -130,6 +145,19 @@ def logout():
     logout_user()
     return redirect('/')
 
+@app.route("/upload", methods=["POST"])
+def upload_image():
+    if 'image' not in request.files:
+        return render_template('index.html', message="No file part")
+    file = request.files['image']
+    if not file or not file.filename:  
+        return render_template('index.html', message="No selected file")
+    filename = secure_filename(file.filename)
+    if not filename:  
+        return render_template('index.html', message="Invalid file name")
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.get_id()) + "_" + str(id) + ".jpg")
+    file.save(file_path)
+    return redirect('/index')
 
 if __name__ == "__main__":
     app.run(debug=True)
