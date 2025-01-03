@@ -1,5 +1,6 @@
 from asyncio import current_task
 from datetime import datetime
+from email.mime import image
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -13,8 +14,10 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-with app.app_context():
-    db.create_all()
+def drop_all():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -24,6 +27,7 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, nullable = False)
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
+    image = db.Column(db.String(200), nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     
     def __repr__(self):
@@ -57,9 +61,22 @@ def home():
 @app.route('/index', methods=['POST', 'GET'])
 @login_required
 def index():
+    # file_path = ""
     if request.method == 'POST':
         task_content = request.form['content']
-        new_task=Todo(content=task_content, user_id = current_user.get_id())
+        task_image = request.files['image']
+        if not task_image or not task_image.filename:  
+            filename = ""
+        else:
+            filename = secure_filename(task_image.filename)
+        if not filename == "":  
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            task_image.save(file_path)
+            new_task=Todo(content=task_content, user_id = current_user.get_id(), image = file_path)
+        else:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], "empty.png")
+            new_task=Todo(content=task_content, user_id = current_user.get_id(), image = file_path)
+
         try:
             db.session.add(new_task)
             db.session.commit()
@@ -161,3 +178,4 @@ def upload_image():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    # drop_all()
