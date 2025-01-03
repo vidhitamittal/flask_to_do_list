@@ -9,8 +9,9 @@
     <h1 style="text-align: center">Update Task</h1>
 
     <div class="form">
-        <form action="/update/{{task.id}}" method="POST">
+        <form action="/update/{{task.id}}" method="POST" enctype="multipart/form-data">
             <input type="text" name="content" id="content" value="{{task.content}}" required>
+            <input type="file" name="image" value ="{{task.image}}" accept="image/*">
             <input type="submit" value="Update">
         </form>
     </div>

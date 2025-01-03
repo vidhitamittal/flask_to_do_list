@@ -61,7 +61,6 @@ def home():
 @app.route('/index', methods=['POST', 'GET'])
 @login_required
 def index():
-    # file_path = ""
     if request.method == 'POST':
         task_content = request.form['content']
         task_image = request.files['image']
@@ -112,10 +111,19 @@ def display(id):
 @login_required
 def update(id):
     task = Todo.query.get_or_404(id)
-   
     if request.method == 'POST':
         task.content = request.form['content']
-    
+        image = request.files['image']
+        if not image or not image.filename:  
+            filename = ""
+        else:
+            filename = secure_filename(image.filename)
+        if not filename == "":  
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(file_path)
+        else:
+            file_path = task.image
+        task.image = file_path
         try:
             db.session.commit()
             return redirect('/index')
@@ -161,20 +169,6 @@ def login():
 def logout():
     logout_user()
     return redirect('/')
-
-@app.route("/upload", methods=["POST"])
-def upload_image():
-    if 'image' not in request.files:
-        return render_template('index.html', message="No file part")
-    file = request.files['image']
-    if not file or not file.filename:  
-        return render_template('index.html', message="No selected file")
-    filename = secure_filename(file.filename)
-    if not filename:  
-        return render_template('index.html', message="Invalid file name")
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.get_id()) + "_" + str(id) + ".jpg")
-    file.save(file_path)
-    return redirect('/index')
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -20,9 +20,7 @@
         </tr>
         {% for task in tasks %}
         <tr>
-            <td style="padding: 10px; border: 1px solid #ddd;">
-                <a href="/display/{{task.id}}" style="color: #0277d6; text-decoration: none;">{{ task.content }}</a>
-            </td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ task.content }}</a></td>
             <td style="padding: 10px; border: 1px solid #ddd;">
                 <img src="{{task.image}}" alt="Uploaded Image" style="max-width: 300px;">
             </td>
