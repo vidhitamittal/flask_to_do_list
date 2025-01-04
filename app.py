@@ -1,7 +1,5 @@
-from asyncio import current_task
 from datetime import datetime
-from email.mime import image
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import os
@@ -14,10 +12,8 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-def drop_all():
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
+with app.app_context():
+    db.create_all()
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -97,6 +93,18 @@ def delete(id):
         return redirect('/index')
     except:
         return "your task could not be deleted"
+    
+@app.route('/deleteimage/<int:id>')
+@login_required
+def delete_image(id):
+    task = Todo.query.get_or_404(id)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], "empty.png")
+    task.image = filepath
+    try:
+        db.session.commit()
+        return redirect('/index')
+    except:
+        return "your image could not be deleted"
     
 @app.route('/display/<int:id>')
 @login_required

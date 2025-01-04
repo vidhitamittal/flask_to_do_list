@@ -26,7 +26,9 @@
             </td>
             <td style="padding: 10px; border: 1px solid #ddd;">{{ task.date_created.date() }}</td>
             <td style="padding: 10px; border: 1px solid #ddd;">
-                <a href="/delete/{{task.id}}" style="color: #6902d6; text-decoration: none;">Delete</a>
+                <a href="/delete/{{task.id}}" style="color: #6902d6; text-decoration: none;">Delete the Whole Task</a>
+                <br>
+                <a href="/deleteimage/{{task.id}}" style="color: #6902d6; text-decoration: none;">Delete Just the Image</a>
                 <br>
                 <a href="/update/{{task.id}}" style="color: #6902d6; text-decoration: none;">Update</a>
             </td>
@@ -38,7 +40,7 @@
     <div class="form">
         <form action="/index" method="POST" enctype="multipart/form-data">
             <input type="text" name="content" id="content" placeholder="Enter new task" required>
-            <input type="file" name="image" accept="image/*">
+            <input type="file" name="image" accept="image/*" multiple>
             <input type="submit" value="Add Task">
         </form>
     </div>
