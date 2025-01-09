@@ -1,4 +1,5 @@
 from datetime import datetime
+from hmac import new
 from types import NoneType
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -8,6 +9,7 @@ from io import BytesIO
 import os
 import base64
 from sqlalchemy import Null, null
+from sympy import content
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -63,9 +65,6 @@ def index():
     if request.method == 'POST':
         task_content = request.form['content']
         uploaded_files = request.files.getlist('image')
-        print("uploaded files", uploaded_files)
-        num_files = len(uploaded_files)
-        print("number of files", num_files)
         for task_image in uploaded_files:
             if not task_image or not task_image.filename:  
                 filename = ""
@@ -79,6 +78,8 @@ def index():
                     image_bytes = buf.getvalue()
                 encodedImage = base64.b64encode(image_bytes)
                 new_task=Todo(content=task_content, user_id = current_user.get_id(), image = encodedImage.decode("utf-8"))
+            else:
+                new_task=Todo(content=task_content, user_id = current_user.get_id())
             try:
                 db.session.add(new_task)
                 db.session.commit()
@@ -106,7 +107,7 @@ def delete(id):
 @login_required
 def delete_image(id):
     task = Todo.query.get_or_404(id)
-    task.image = ""
+    task.image = None
     try:
         db.session.commit()
         return redirect('/index')
@@ -121,17 +122,17 @@ def update(id):
         task.content = request.form['content']
         task_image = request.files['image']
         if not task_image or not task_image.filename:  
-                filename = ""
+            filename = task.image
         else:
             filename = secure_filename(task_image.filename)
-        if not filename == "":  
+        if not filename == task.image:  
             uploadedImage = Image.open(task_image.stream)
             file_extension = filename[filename.rindex(".")+1:]
             with BytesIO() as buf:
                 uploadedImage.save(buf, str(file_extension))
                 image_bytes = buf.getvalue()
             encodedImage = base64.b64encode(image_bytes)
-        task.image = encodedImage.decode("utf-8")
+            task.image = encodedImage.decode("utf-8")
         try:
             db.session.commit()
             return redirect('/index')
