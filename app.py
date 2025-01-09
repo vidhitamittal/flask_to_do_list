@@ -23,12 +23,11 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, nullable = False)
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
-    image = db.Column(db.String(200), nullable = False)
+    image = db.Column(db.Text, nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     
     def __repr__(self):
         return '<Task %r>' % self.id
-    
 
 class User(db.Model):
     user_id = db.Column(db.Integer, primary_key = True)
@@ -37,7 +36,6 @@ class User(db.Model):
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     is_active = db.Column(db.Boolean , default = True)
     is_authenticated = db.Column(db.Boolean , default = True)
-    is_anonymous = db.Column(db.Boolean , default = False)
 
     def __repr__(self):
         return '<User %r>' % self.user_id
@@ -59,25 +57,27 @@ def home():
 def index():
     if request.method == 'POST':
         task_content = request.form['content']
-        task_image = request.files['image']
-        if not task_image or not task_image.filename:  
-            filename = ""
-        else:
-            filename = secure_filename(task_image.filename)
-        if not filename == "":  
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            task_image.save(file_path)
-            new_task=Todo(content=task_content, user_id = current_user.get_id(), image = file_path)
-        else:
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], "empty.png")
-            new_task=Todo(content=task_content, user_id = current_user.get_id(), image = file_path)
-
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect('/index')
-        except:
-            return 'there was an issue adding your task'
+        uploaded_files = request.files.getlist('image')
+        print("uploaded files", uploaded_files)
+        num_files = len(uploaded_files)
+        print("number of files", num_files)
+        for task_image in uploaded_files:
+            if not task_image or not task_image.filename:  
+                filename = ""
+            else:
+                filename = secure_filename(task_image.filename)
+            if not filename == "":  
+                new_task=Todo(content=task_content, user_id = current_user.get_id(), image = task_image.read())
+            else:
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], "empty.png")
+                new_task=Todo(content=task_content, user_id = current_user.get_id(), image = file_path)
+            try:
+                db.session.add(new_task)
+                db.session.commit()
+            except:
+                return 'there was an issue adding your task'
+            
+        return redirect('/index')
     else:
         tasks = Todo.query.filter_by(user_id = current_user.get_id()).all()
         return render_template('index.html' , tasks=tasks)
@@ -180,4 +180,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # drop_all()
