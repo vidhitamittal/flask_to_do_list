@@ -1,8 +1,13 @@
 from datetime import datetime
+from types import NoneType
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from PIL import Image
+from io import BytesIO
 import os
+import base64
+from sqlalchemy import Null, null
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -23,7 +28,7 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, nullable = False)
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
-    image = db.Column(db.Text, nullable = False)
+    image = db.Column(db.String, nullable = True)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     
     def __repr__(self):
@@ -67,10 +72,13 @@ def index():
             else:
                 filename = secure_filename(task_image.filename)
             if not filename == "":  
-                new_task=Todo(content=task_content, user_id = current_user.get_id(), image = task_image.read())
-            else:
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], "empty.png")
-                new_task=Todo(content=task_content, user_id = current_user.get_id(), image = file_path)
+                uploadedImage = Image.open(task_image.stream)
+                file_extension = filename[filename.rindex(".")+1:]
+                with BytesIO() as buf:
+                    uploadedImage.save(buf, str(file_extension))
+                    image_bytes = buf.getvalue()
+                encodedImage = base64.b64encode(image_bytes)
+                new_task=Todo(content=task_content, user_id = current_user.get_id(), image = encodedImage.decode("utf-8"))
             try:
                 db.session.add(new_task)
                 db.session.commit()
@@ -98,22 +106,12 @@ def delete(id):
 @login_required
 def delete_image(id):
     task = Todo.query.get_or_404(id)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], "empty.png")
-    task.image = filepath
+    task.image = ""
     try:
         db.session.commit()
         return redirect('/index')
     except:
         return "your image could not be deleted"
-    
-@app.route('/display/<int:id>')
-@login_required
-def display(id):
-    try:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.get_id()) + "_" + str(id) + ".jpg")
-        return render_template('display.html', image_url=file_path)
-    except: 
-        return "there is a problem with the image"
     
 @app.route('/update/<int:id>', methods=['POST','GET'])
 @login_required
@@ -121,17 +119,19 @@ def update(id):
     task = Todo.query.get_or_404(id)
     if request.method == 'POST':
         task.content = request.form['content']
-        image = request.files['image']
-        if not image or not image.filename:  
-            filename = ""
+        task_image = request.files['image']
+        if not task_image or not task_image.filename:  
+                filename = ""
         else:
-            filename = secure_filename(image.filename)
+            filename = secure_filename(task_image.filename)
         if not filename == "":  
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image.save(file_path)
-        else:
-            file_path = task.image
-        task.image = file_path
+            uploadedImage = Image.open(task_image.stream)
+            file_extension = filename[filename.rindex(".")+1:]
+            with BytesIO() as buf:
+                uploadedImage.save(buf, str(file_extension))
+                image_bytes = buf.getvalue()
+            encodedImage = base64.b64encode(image_bytes)
+        task.image = encodedImage.decode("utf-8")
         try:
             db.session.commit()
             return redirect('/index')
