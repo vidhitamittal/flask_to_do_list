@@ -30,7 +30,6 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, nullable = False)
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
-    # image = db.Column(db.String, nullable = True)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     
     def __repr__(self):
