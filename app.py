@@ -9,7 +9,7 @@ from io import BytesIO
 import os
 import base64
 from sqlalchemy import Null, null
-from sympy import content
+from sympy import Id, content
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -30,7 +30,7 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, nullable = False)
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
-    image = db.Column(db.String, nullable = True)
+    # image = db.Column(db.String, nullable = True)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     
     def __repr__(self):
@@ -50,6 +50,14 @@ class User(db.Model):
     def get_id(self):
         return self.user_id
 
+class TaskImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('todo.id'), nullable=False)
+    image = db.Column(db.String, nullable=False)  #base 64
+
+    def __repr__(self):
+        return '<TaskImage %r>' % self.id
+    
 @login_manager.user_loader
 def loader_user(user_id):
     return User.query.get(user_id)
@@ -65,55 +73,57 @@ def index():
     if request.method == 'POST':
         task_content = request.form['content']
         uploaded_files = request.files.getlist('image')
+        new_task=Todo(content=task_content, user_id = current_user.get_id())
+        try:
+            db.session.add(new_task)
+            db.session.commit()
+        except:
+            return 'there was an issue adding your task'
+        
         for task_image in uploaded_files:
-            if not task_image or not task_image.filename:  
-                filename = ""
-            else:
+            if task_image and task_image.filename:
                 filename = secure_filename(task_image.filename)
-            if not filename == "":  
                 uploadedImage = Image.open(task_image.stream)
                 file_extension = "jpeg" if filename[filename.rindex(".")+1:] == "jpg" else filename[filename.rindex(".")+1:]
                 with BytesIO() as buf:
                     uploadedImage.save(buf, str(file_extension))
                     image_bytes = buf.getvalue()
                 encodedImage = base64.b64encode(image_bytes)
-                new_task=Todo(content=task_content, user_id = current_user.get_id(), image = encodedImage.decode("utf-8"))
-            else:
-                new_task=Todo(content=task_content, user_id = current_user.get_id())
-            try:
-                db.session.add(new_task)
-                db.session.commit()
-            except:
-                return 'there was an issue adding your task'
-            
+                task_image_entry = TaskImage(task_id=new_task.id, image=encodedImage.decode("utf-8"))
+                try:
+                    db.session.add(task_image_entry)
+                    db.session.commit()
+                except:
+                    return 'there was an issue adding your image'
         return redirect('/index')
     else:
         tasks = Todo.query.filter_by(user_id = current_user.get_id()).all()
-        return render_template('index.html' , tasks=tasks)
+        task_images = {task.id: TaskImage.query.filter_by(task_id=task.id).all() for task in tasks}
+        return render_template('index.html', tasks=tasks, task_images=task_images)
+        # return render_template('index.html' , tasks=tasks)
 
 @app.route('/delete/<int:id>')
 @login_required
 def delete(id):
     task_to_delete = Todo.query.get_or_404(id)
-
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
         return redirect('/index')
     except:
-        return "your task could not be deleted"
+        return "The task could not be deleted"
     
 @app.route('/deleteimage/<int:id>')
 @login_required
 def delete_image(id):
-    task = Todo.query.get_or_404(id)
-    task.image = None
+    image_to_delete = TaskImage.query.get_or_404(id)
     try:
+        db.session.delete(image_to_delete)
         db.session.commit()
         return redirect('/index')
     except:
-        return "your image could not be deleted"
-    
+        return "The image could not be deleted."
+
 @app.route('/update/<int:id>', methods=['POST','GET'])
 @login_required
 def update(id):
