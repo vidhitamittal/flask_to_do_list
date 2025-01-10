@@ -72,7 +72,7 @@ def index():
                 filename = secure_filename(task_image.filename)
             if not filename == "":  
                 uploadedImage = Image.open(task_image.stream)
-                file_extension = filename[filename.rindex(".")+1:]
+                file_extension = "jpeg" if filename[filename.rindex(".")+1:] == "jpg" else filename[filename.rindex(".")+1:]
                 with BytesIO() as buf:
                     uploadedImage.save(buf, str(file_extension))
                     image_bytes = buf.getvalue()
