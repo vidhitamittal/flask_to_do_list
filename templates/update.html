@@ -6,28 +6,49 @@
 
 {% block body %}
 <div class="content">
-    <h1 style="text-align: center">Update Task</h1>
+    <h1>Update Task</h1>
 
-    <table style="width: 30%; border-collapse: collapse;">
+    <table style="width: 80%; border-collapse: collapse; margin:auto">
         <tr style="background-color: #2e86c1;">
             <th style="padding: 10px; border: 1px solid #ddd;">Task</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Image</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Existing Images</th>
         </tr>
         <tr>
             <td style="padding: 10px; border: 1px solid #ddd;">{{ task.content }}</td>
-            <td style="padding: 10px; border: 1px solid #ddd;">
-                {% if task.image != none %}
-                <img src="data:image;base64,{{task.image}}" alt="Uploaded Image" style="max-width: 100%; ">
+            <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                {% if images %}
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    {% for img in images %}
+                        <div style="margin-bottom: 10px;">
+                            <img src="data:image;base64,{{ img.base64 }}" alt="Uploaded Image" style="max-width: 150px; max-height: 150px;">
+                            <br>
+                            <a href="/deleteimage/{{img.id}}" style="color: #6902d6;">Remove</a>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <p>No images uploaded for this task.</p>
                 {% endif %}
             </td>
         </tr>
     </table>
-<form action="/update/{{task.id}}" method="POST" enctype="multipart/form-data">
-    <div class="form">
-        <input type="text" name="content" id="content" value="{{task.content}}" required>
-        <input type="file" name="image" accept="image/*">
-        <input type="submit" value="Update">
-        </form>
+
+    <form action="/update/{{ task.id }}" method="POST" enctype="multipart/form-data" style="margin: 20px auto; width: 50%;">
+        <div class="form">
+            <label for="content"><strong>Update Task Content:</strong></label>
+            <br>
+            <input type="text" name="content" id="content" value="{{ task.content }}" required style="width: 80%; padding: 5px; margin: 10px 0;">
+            <br><br>
+            <label for="image"><strong>Add More Images:</strong></label>
+            <br>
+            <input type="file" name="image" id="image" accept="image/*" multiple>
+            <br><br>
+
+            <input type="submit" value="Update" style="padding: 10px 20px; background-color: #2e86c1; color: white; border: none; cursor: pointer;">
+        </div>
+    </form>
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/index" style="color: #ddd; text-decoration: none;">Back to Tasks</a>
     </div>
 </div>
 {% endblock %}

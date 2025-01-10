@@ -26,9 +26,9 @@
                 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                     {% for image in task_images[task.id] %}
                     <div>
-                        <img src="data:image/png;base64,{{ image.image }}" alt="Uploaded Image" style="max-width: 150px; max-height: 150px;">
+                        <img src="data:image;base64,{{ image.image }}" alt="Uploaded Image" style="max-width: 150px; max-height: 150px;">
                         <br>
-                        <a href="/deleteimage/{{image.id}}" style="color: #6902d6; text-decoration: none;">Delete Image</a>
+                        <a href="/deleteimage/{{image.id}}" style="color: #6902d6;">Delete Image</a>
                     </div>
                     {% endfor %}
                 </div>
@@ -48,11 +48,12 @@
     <div class="form">
         <form action="/index" method="POST" enctype="multipart/form-data">
             <input type="text" name="content" id="content" placeholder="Enter new task" required>
+            <br>
             <input type="file" name="image" accept="image/*" multiple>
+            <br><br>
             <input type="submit" value="Add Task">
         </form>
-    </div>
-   
+    </div>   
 </div>
 <nav>
     <ul>

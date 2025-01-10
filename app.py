@@ -100,8 +100,7 @@ def index():
         tasks = Todo.query.filter_by(user_id = current_user.get_id()).all()
         task_images = {task.id: TaskImage.query.filter_by(task_id=task.id).all() for task in tasks}
         return render_template('index.html', tasks=tasks, task_images=task_images)
-        # return render_template('index.html' , tasks=tasks)
-
+    
 @app.route('/delete/<int:id>')
 @login_required
 def delete(id):
@@ -109,10 +108,18 @@ def delete(id):
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/index')
     except:
         return "The task could not be deleted"
     
+    task_images = TaskImage.query.filter_by(task_id=id).all()
+    for img in task_images:
+        try:
+            db.session.delete(img)
+            db.session.commit()
+        except:
+            return "The images could not be deleted"
+    return redirect('/index')
+
 @app.route('/deleteimage/<int:id>')
 @login_required
 def delete_image(id):
@@ -128,29 +135,29 @@ def delete_image(id):
 @login_required
 def update(id):
     task = Todo.query.get_or_404(id)
+    existing_images = TaskImage.query.filter_by(task_id=id).all()
+    
     if request.method == 'POST':
         task.content = request.form['content']
-        task_image = request.files['image']
-        if not task_image or not task_image.filename:  
-            filename = task.image
-        else:
-            filename = secure_filename(task_image.filename)
-        if not filename == task.image:  
-            uploadedImage = Image.open(task_image.stream)
-            file_extension = filename[filename.rindex(".")+1:]
-            with BytesIO() as buf:
-                uploadedImage.save(buf, str(file_extension))
-                image_bytes = buf.getvalue()
-            encodedImage = base64.b64encode(image_bytes)
-            task.image = encodedImage.decode("utf-8")
+        uploaded_files = request.files.getlist('image')
+        for task_image in uploaded_files:
+            if task_image and task_image.filename:
+                filename = secure_filename(task_image.filename)
+                uploaded_image = Image.open(task_image.stream)
+                file_extension = "jpeg" if filename[filename.rindex(".")+1:] == "jpg" else filename[filename.rindex(".")+1:]
+                with BytesIO() as buf:
+                    uploaded_image.save(buf, file_extension)
+                    image_bytes = buf.getvalue()
+                encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+                new_image = TaskImage(task_id=task.id, image=encoded_image)
+                db.session.add(new_image)
         try:
             db.session.commit()
             return redirect('/index')
-        except:
-            return "task could not be updated"
-
-    else: 
-        return render_template('update.html' , task=task)
+        except Exception as e:
+            return f"Task could not be updated: {e}"
+    images = [{'id': img.id, 'base64': img.image} for img in existing_images]
+    return render_template('update.html', task=task, images=images)
         
 @app.route('/register', methods=["GET", "POST"])
 def register():
