@@ -1,6 +1,4 @@
 from datetime import datetime
-from hmac import new
-from types import NoneType
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -8,8 +6,6 @@ from PIL import Image
 from io import BytesIO
 import os
 import base64
-from sqlalchemy import Null, null
-from sympy import Id, content
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
