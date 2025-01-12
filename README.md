@@ -106,4 +106,3 @@ For inquiries, support, or to report bugs and request new features, please feel 
 **Email:** vidhitamittal@gmail.com  
 
 Feel free to reach out with any feedback and suggestions to improve the application.
-
