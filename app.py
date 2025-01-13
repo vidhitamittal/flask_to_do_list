@@ -17,6 +17,11 @@ login_manager.init_app(app)
 
 with app.app_context():
     db.create_all()
+    
+def drop_all():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -27,6 +32,7 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
+    deadline = db.Column(db.String(10))
     
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -68,12 +74,15 @@ def index():
     if request.method == 'POST':
         task_content = request.form['content']
         uploaded_files = request.files.getlist('image')
-        new_task=Todo(content=task_content, user_id = current_user.get_id())
+        deadline = request.form['date']
+        print("deadline",deadline)
+        new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = str(deadline))
         try:
             db.session.add(new_task)
             db.session.commit()
-        except:
-            return 'there was an issue adding your task'
+        except Exception as e:
+            return str(e)
+            # return 'there was an issue adding your task'
         
         for task_image in uploaded_files:
             if task_image and task_image.filename:
@@ -193,3 +202,4 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    # drop_all()
