@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -77,6 +77,8 @@ def index():
         deadline = request.form['date']
         due_date = datetime.strptime(deadline, '%Y-%m-%d')
         print("deadline",deadline)
+        if (due_date < (datetime.now()- timedelta(days=1))):
+            return render_template('pastDeadline.html')
         new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = due_date)
         try:
             db.session.add(new_task)
@@ -146,6 +148,8 @@ def update(id):
         task.content = request.form['content']
         uploaded_files = request.files.getlist('image')
         deadline = request.form['date']
+        if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
+            return render_template('pastDeadline.html')
         task.deadline = datetime.strptime(deadline, '%Y-%m-%d')
         for task_image in uploaded_files:
             if task_image and task_image.filename:
