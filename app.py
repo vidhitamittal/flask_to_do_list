@@ -32,7 +32,7 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
-    deadline = db.Column(db.String(10))
+    deadline = db.Column(db.DateTime)
     
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -75,8 +75,9 @@ def index():
         task_content = request.form['content']
         uploaded_files = request.files.getlist('image')
         deadline = request.form['date']
+        due_date = datetime.strptime(deadline, '%Y-%m-%d')
         print("deadline",deadline)
-        new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = str(deadline))
+        new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = due_date)
         try:
             db.session.add(new_task)
             db.session.commit()
@@ -144,6 +145,8 @@ def update(id):
     if request.method == 'POST':
         task.content = request.form['content']
         uploaded_files = request.files.getlist('image')
+        deadline = request.form['date']
+        task.deadline = datetime.strptime(deadline, '%Y-%m-%d')
         for task_image in uploaded_files:
             if task_image and task_image.filename:
                 filename = secure_filename(task_image.filename)
