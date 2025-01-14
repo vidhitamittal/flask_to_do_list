@@ -12,6 +12,7 @@
         <tr style="background-color: #2e86c1;">
             <th style="padding: 10px; border: 1px solid #ddd;">Task</th>
             <th style="padding: 10px; border: 1px solid #ddd;">Existing Images</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Due Date</th>
         </tr>
         <tr>
             <td style="padding: 10px; border: 1px solid #ddd;">{{ task.content }}</td>
@@ -30,6 +31,7 @@
                     <p>No images uploaded for this task.</p>
                 {% endif %}
             </td>
+            <td style="padding: 10px; border: 1px solid #ddd;">{{ task.deadline.date() }}</td>
         </tr>
     </table>
 
@@ -38,12 +40,14 @@
             <label for="content"><strong>Update Task Content:</strong></label>
             <br>
             <input type="text" name="content" id="content" value="{{ task.content }}" required style="width: 80%; padding: 5px; margin: 10px 0;">
-            <br><br>
             <label for="image"><strong>Add More Images:</strong></label>
             <br>
             <input type="file" name="image" id="image" accept="image/*" multiple>
             <br><br>
-
+            <label for="deadline"><strong>Change Due Date:</strong></label>
+            <br>
+            <input type="date" id="deadline" name="date">
+            <br><br>
             <input type="submit" value="Update" style="padding: 10px 20px; background-color: #2e86c1; color: white; border: none; cursor: pointer;">
         </div>
     </form>

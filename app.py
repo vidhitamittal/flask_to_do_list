@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -27,6 +27,7 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
+    deadline = db.Column(db.DateTime)
     
     def __repr__(self):
         return '<Task %r>' % self.id
@@ -68,12 +69,18 @@ def index():
     if request.method == 'POST':
         task_content = request.form['content']
         uploaded_files = request.files.getlist('image')
-        new_task=Todo(content=task_content, user_id = current_user.get_id())
+        deadline = request.form['date']
+        due_date = datetime.strptime(deadline, '%Y-%m-%d')
+        print("deadline",deadline)
+        if (due_date < (datetime.now()- timedelta(days=1))):
+            return render_template('pastDeadline.html')
+        new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = due_date)
         try:
             db.session.add(new_task)
             db.session.commit()
-        except:
-            return 'there was an issue adding your task'
+        except Exception as e:
+            return str(e)
+            # return 'there was an issue adding your task'
         
         for task_image in uploaded_files:
             if task_image and task_image.filename:
@@ -135,6 +142,10 @@ def update(id):
     if request.method == 'POST':
         task.content = request.form['content']
         uploaded_files = request.files.getlist('image')
+        deadline = request.form['date']
+        if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
+            return render_template('pastDeadline.html')
+        task.deadline = datetime.strptime(deadline, '%Y-%m-%d')
         for task_image in uploaded_files:
             if task_image and task_image.filename:
                 filename = secure_filename(task_image.filename)
