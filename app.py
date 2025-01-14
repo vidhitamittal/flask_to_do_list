@@ -17,11 +17,6 @@ login_manager.init_app(app)
 
 with app.app_context():
     db.create_all()
-    
-def drop_all():
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -209,4 +204,3 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # drop_all()
