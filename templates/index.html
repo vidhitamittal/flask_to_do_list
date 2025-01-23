@@ -1,69 +1,83 @@
 {% extends 'base.html' %}
 
-{% block head %}
-<title>Task Master</title>
-{% endblock %}
+{% block title %}Task Master{% endblock %}
 
-{% block body %}
-
+{% block content %}
 <div class="content">
-    <h1 style="text-align: center">Daily TaskMaster</h1>
+    <h1 class="center-align">Daily TaskMaster</h1>
     {% if tasks|length < 1 %}
-    <h4 style="text-align: center">There are no tasks. Please create one below.</h4>
+    <h4 class="center-align">There are no tasks. Please create one below.</h4>
     {% else %}
-    <table style="width: 100%; border-collapse: collapse;">
-        <tr style="background-color: #2e86c1;">
-            <th style="padding: 10px; border: 1px solid #ddd;">Task</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Image</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Date Added</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Due Date</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Actions</th>
-        </tr>
-        {% for task in tasks %}
-        <tr>
-            <td style="padding: 10px; border: 1px solid #ddd;">{{ task.content }}</td>
-            <td style="padding: 10px; border: 1px solid #ddd;">
-                {% if task_images[task.id]|length > 0 %}
-                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    {% for image in task_images[task.id] %}
-                    <div>
-                        <img src="data:image;base64,{{ image.image }}" alt="Uploaded Image" style="max-width: 150px; max-height: 150px;">
-                        <br>
-                        <a href="/deleteimage/{{image.id}}" style="color: #6902d6;">Delete Image</a>
+    <table class="highlight responsive-table">
+        <thead>
+            <tr class="teal lighten-2">
+                <th>Task</th>
+                <th>Image</th>
+                <th>Date Added</th>
+                <th>Due Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.content }}</td>
+                <td>
+                    {% if task_images[task.id]|length > 0 %}
+                    <div class="row">
+                        {% for image in task_images[task.id] %}
+                        <div class="col s12 m4">
+                            <img src="data:image;base64,{{ image.image }}" alt="Uploaded Image" class="responsive-img">
+                            <br>
+                            <a href="/deleteimage/{{image.id}}" class="red-text">Delete Image</a>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </td>
-            <td style="padding: 10px; border: 1px solid #ddd;">{{ task.date_created.date() }}</td>
-            <td style="padding: 10px; border: 1px solid #ddd;">{{ task.deadline.date() }}</td>
-            <td style="padding: 10px; border: 1px solid #ddd;">
-                <a href="/delete/{{task.id}}" style="color: #6902d6; text-decoration: none;">Delete the Whole Task</a>
-                <br>
-                <a href="/update/{{task.id}}" style="color: #6902d6; text-decoration: none;">Update the Task</a>
-            </td>
-        </tr>
-        {% endfor %}
+                    {% endif %}
+                </td>
+                <td>{{ task.date_created.date() }}</td>
+                <td>
+                    {% if task.deadline is not none %}
+                        {{ task.deadline.date() }}
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/delete/{{task.id}}" class="purple-text text-darken-2">Delete the Whole Task</a>
+                    <br>
+                    <a href="/update/{{task.id}}" class="purple-text text-darken-2">Update the Task</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
     {% endif %}
 
-    <div class="form">
-        <form action="/index" method="POST" enctype="multipart/form-data">
-            <input type="text" name="content" id="content" placeholder="Enter new task" required>
-            <br>
-            <label>Images:</label>
-            <input type="file" name="image" accept="image/*" multiple>
-            <br><br>
-            <label>Deadline:</label>
-            <input type="date" id="deadline" name="date">
-            <br><br>
-            <input type="submit" value="Add Task">
+    <div class="row">
+        <form action="/index" method="POST" enctype="multipart/form-data" class="col s12">
+            <div class="input-field">
+                <input type="text" name="content" id="content" required>
+                <label for="content">Enter new task</label>
+            </div>
+            <div class="file-field input-field">
+                <div class="btn">
+                    <span>Upload Images</span>
+                    <input type="file" name="image" accept="image/*" multiple>
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                </div>
+            </div>
+            <div class="input-field">
+                <input type="date" id="deadline" name="date">
+                <label for="deadline">Deadline</label>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit">Add Task</button>
         </form>
-    </div>   
+    </div>
 </div>
 <nav>
-    <ul>
-        <li><a href="/logout">Logout</a></li>
+    <ul class="pagination center-align">
+        <li><a href="/logout" class="btn red">Logout</a></li>
     </ul>
 </nav>
 {% endblock %}
