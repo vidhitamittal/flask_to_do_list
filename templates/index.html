@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="content">
-    <h1 class="center-align">Daily TaskMaster</h1>
+    <br>
     {% if tasks|length < 1 %}
     <h4 class="center-align">There are no tasks. Please create one below.</h4>
     {% else %}
@@ -42,9 +42,9 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="/delete/{{task.id}}" class="purple-text text-darken-2">Delete the Whole Task</a>
+                    <a href="/delete/{{task.id}}" class="purple-text text-darken-2">Delete Task</a>
                     <br>
-                    <a href="/update/{{task.id}}" class="purple-text text-darken-2">Update the Task</a>
+                    <a href="/update/{{task.id}}" class="purple-text text-darken-2">Update Task</a>
                 </td>
             </tr>
             {% endfor %}
@@ -75,9 +75,9 @@
         </form>
     </div>
 </div>
-<nav>
+
     <ul class="pagination center-align">
         <li><a href="/logout" class="btn red">Logout</a></li>
     </ul>
-</nav>
+
 {% endblock %}
