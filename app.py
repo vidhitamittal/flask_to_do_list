@@ -70,17 +70,17 @@ def index():
         task_content = request.form['content']
         uploaded_files = request.files.getlist('image')
         deadline = request.form['date']
-        due_date = datetime.strptime(deadline, '%Y-%m-%d')
-        print("deadline",deadline)
-        if (due_date < (datetime.now()- timedelta(days=1))):
-            return render_template('pastDeadline.html')
-        new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = due_date)
+        if(deadline != ''): 
+            if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
+                return render_template('pastDeadline.html')
+            new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = datetime.strptime(deadline, '%Y-%m-%d'))
+        else:
+            new_task=Todo(content=task_content, user_id = current_user.get_id())
         try:
             db.session.add(new_task)
             db.session.commit()
-        except Exception as e:
-            return str(e)
-            # return 'there was an issue adding your task'
+        except:
+            return 'there was an issue adding your task'
         
         for task_image in uploaded_files:
             if task_image and task_image.filename:
@@ -143,9 +143,11 @@ def update(id):
         task.content = request.form['content']
         uploaded_files = request.files.getlist('image')
         deadline = request.form['date']
-        if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
-            return render_template('pastDeadline.html')
-        task.deadline = datetime.strptime(deadline, '%Y-%m-%d')
+        if(deadline != ''): 
+            if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
+                return render_template('pastDeadline.html')
+            task.deadline = datetime.strptime(deadline, '%Y-%m-%d')
+        
         for task_image in uploaded_files:
             if task_image and task_image.filename:
                 filename = secure_filename(task_image.filename)
@@ -180,7 +182,7 @@ def register():
             return render_template('alreadyRegistered.html') #user already registered
 
     else: 
-	    return render_template('signup.html')
+	    return render_template('register.html')
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
