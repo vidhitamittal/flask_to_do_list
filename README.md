@@ -89,15 +89,16 @@ How It Works:
 **Screenshots**
 
 Welcome page:
-![https://private-user-images.githubusercontent.com/122602734/402298131-52f57ed2-cb49-4478-b700-220477e7869e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzY2NDA5NTAsIm5iZiI6MTczNjY0MDY1MCwicGF0aCI6Ii8xMjI2MDI3MzQvNDAyMjk4MTMxLTUyZjU3ZWQyLWNiNDktNDQ3OC1iNzAwLTIyMDQ3N2U3ODY5ZS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMTEyJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDExMlQwMDEwNTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yY2IzN2YxMzZiNDBjOGZiMTdmMGYzYjY3YzBmYWRjMGE5ZGQ2MjkxZTg0NDcyODQyOTk2MDUxMDFkYzBjYWVkJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.XLG28cGvQQquIBUwTKxDw6cO9T5J2z1PPqMY9964TU4](https://private-user-images.githubusercontent.com/122602734/402298131-52f57ed2-cb49-4478-b700-220477e7869e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzY2NDEzMzAsIm5iZiI6MTczNjY0MTAzMCwicGF0aCI6Ii8xMjI2MDI3MzQvNDAyMjk4MTMxLTUyZjU3ZWQyLWNiNDktNDQ3OC1iNzAwLTIyMDQ3N2U3ODY5ZS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwMTEyJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDExMlQwMDE3MTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1iYjJiNjJjNzc3YmVkMjljZmFjMTVkNDUxZmMwMTViNDUxNTRmNmJiNTIyYTgyODM0ZmVjYjc5OWMzNWE1OTIxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.8p-RhMWGBBxOEjGCAvtaL0bvKzOfkk0DCjOoTQV5XY8)
+<img width="1440" alt="Screenshot 2025-01-30 at 12 50 49 PM" src="https://github.com/user-attachments/assets/03fcf0e9-d80c-43cf-8cd4-3c61235b038f" />
 
-Home Page:
-<img width="1440" alt="Screenshot 2025-01-13 at 8 37 03 PM" src="https://github.com/user-attachments/assets/53291d9b-1f5a-4d1f-8073-25d8d75ceb84" />
+Login Page:
+<img width="1440" alt="Screenshot 2025-01-30 at 12 51 07 PM" src="https://github.com/user-attachments/assets/b1c55c34-26a2-4958-a9cf-f10e12ff8994" />
 
+Register Page:
+<img width="1440" alt="Screenshot 2025-01-30 at 12 50 59 PM" src="https://github.com/user-attachments/assets/06ad9939-46c7-4195-88ef-71bd270f729b" />
 
 Update Task:
-<img width="1440" alt="Screenshot 2025-01-13 at 8 37 22 PM" src="https://github.com/user-attachments/assets/537b5a60-e3f8-4a6e-a42d-04075d4b4c05" />
-
+<img width="1440" alt="Screenshot 2025-01-30 at 12 51 37 PM" src="https://github.com/user-attachments/assets/66d5845b-36fe-4ac0-84ff-10a798c3ea6e" />
 
 **Contact Information**
 
