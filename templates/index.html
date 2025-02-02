@@ -5,6 +5,16 @@
 {% block content %}
 <div class="content">
     <br>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="collection">
+                {% for message in messages %}
+                    <li class="collection-item green lighten-4">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     {% if tasks|length < 1 %}
     <h4 class="center-align">There are no tasks. Please create one below.</h4>
     {% else %}
@@ -12,7 +22,7 @@
         <thead>
             <tr class="teal lighten-2">
                 <th>Task</th>
-                <th>Image</th>
+                <th>Images</th>
                 <th>Date Added</th>
                 <th>Due Date</th>
                 <th>Actions</th>
@@ -21,26 +31,29 @@
         <tbody>
             {% for task in tasks %}
             <tr>
-                <td>{{ task.content }}</td>
+                <td>{{ task.content | safe }}</td>
                 <td>
                     {% if task_images[task.id]|length > 0 %}
                     <div class="row">
                         {% for image in task_images[task.id] %}
                         <div class="col s12 m4">
-                            <img src="data:image;base64,{{ image.image }}" alt="Uploaded Image" class="responsive-img">
-                            <br>
-                            <a href="/deleteimage/{{image.id}}" class="red-text">Delete Image</a>
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="data:image;base64,{{ image.image }}" alt="Task Image" class="responsive-img">
+                                </div>
+                                <div class="card-action">
+                                    <a href="/deleteimage/{{image.id}}" class="red-text">Delete Image</a>
+                                </div>
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
+                    {% else %}
+                        <p>No images uploaded</p>
                     {% endif %}
                 </td>
                 <td>{{ task.date_created.date() }}</td>
-                <td>
-                    {% if task.deadline is not none %}
-                        {{ task.deadline.date() }}
-                    {% endif %}
-                </td>
+                <td>{% if task.deadline is not none %}{{ task.deadline.date() }}{% endif %}</td>
                 <td>
                     <a href="/delete/{{task.id}}" class="purple-text text-darken-2">Delete Task</a>
                     <br>
@@ -55,8 +68,8 @@
     <div class="row">
         <form action="/index" method="POST" enctype="multipart/form-data" class="col s12">
             <div class="input-field">
-                <input type="text" name="content" id="content" required>
-                <label for="content">Enter new task</label>
+                <textarea name="content" id="content" class="materialize-textarea" required></textarea>
+                <label for="content">Enter new task (Supports Markdown)</label>
             </div>
             <div class="file-field input-field">
                 <div class="btn">
@@ -76,8 +89,8 @@
     </div>
 </div>
 
-    <ul class="pagination center-align">
-        <li><a href="/logout" class="btn red">Logout</a></li>
-    </ul>
-
+<ul class="pagination center-align">
+    <li><a href="/" class="btn blue">Home</a></li>
+    <li><a href="/logout" class="btn red">Logout</a></li>
+</ul>
 {% endblock %}
