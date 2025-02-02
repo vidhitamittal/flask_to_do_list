@@ -7,6 +7,8 @@ from io import BytesIO
 import os
 import base64
 from werkzeug.utils import secure_filename
+import markdown
+import markdown.extensions.fenced_code
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'f05f31fd-b1e3-43d3-a594-0fbc3862ef1d'
@@ -73,14 +75,14 @@ def index():
         if(deadline != ''): 
             if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
                 return render_template('pastDeadline.html')
-            new_task=Todo(content=task_content, user_id = current_user.get_id(), deadline = datetime.strptime(deadline, '%Y-%m-%d'))
+            new_task = Todo(content=task_content, user_id=current_user.get_id(), deadline=datetime.strptime(deadline, '%Y-%m-%d'))
         else:
-            new_task=Todo(content=task_content, user_id = current_user.get_id())
+            new_task = Todo(content=task_content, user_id=current_user.get_id())
         try:
             db.session.add(new_task)
             db.session.commit()
         except:
-            return 'there was an issue adding your task'
+            return 'There was an issue adding your task'
         
         for task_image in uploaded_files:
             if task_image and task_image.filename:
@@ -88,18 +90,20 @@ def index():
                 uploadedImage = Image.open(task_image.stream)
                 file_extension = "jpeg" if filename[filename.rindex(".")+1:] == "jpg" else filename[filename.rindex(".")+1:]
                 with BytesIO() as buf:
-                    uploadedImage.save(buf, str(file_extension))
+                    uploadedImage.save(buf, file_extension)
                     image_bytes = buf.getvalue()
-                encodedImage = base64.b64encode(image_bytes)
-                task_image_entry = TaskImage(task_id=new_task.id, image=encodedImage.decode("utf-8"))
+                encodedImage = base64.b64encode(image_bytes).decode("utf-8")
+                task_image_entry = TaskImage(task_id=new_task.id, image=encodedImage)
                 try:
                     db.session.add(task_image_entry)
                     db.session.commit()
                 except:
-                    return 'there was an issue adding your image'
+                    return 'There was an issue adding your image'
         return redirect('/index')
     else:
-        tasks = Todo.query.filter_by(user_id = current_user.get_id()).all()
+        tasks = Todo.query.filter_by(user_id=current_user.get_id()).all()
+        for task in tasks:
+            task.content = markdown.markdown(task.content, extensions=['fenced_code', 'tables'])
         task_images = {task.id: TaskImage.query.filter_by(task_id=task.id).all() for task in tasks}
         return render_template('index.html', tasks=tasks, task_images=task_images)
     
@@ -147,6 +151,8 @@ def update(id):
             if (datetime.strptime(deadline, '%Y-%m-%d') < (datetime.now()- timedelta(days=1))):
                 return render_template('pastDeadline.html')
             task.deadline = datetime.strptime(deadline, '%Y-%m-%d')
+
+        task.content = markdown.markdown(task.content, extensions=['fenced_code', 'tables'])
         
         for task_image in uploaded_files:
             if task_image and task_image.filename:
@@ -164,6 +170,8 @@ def update(id):
             return redirect('/index')
         except Exception as e:
             return f"Task could not be updated: {e}"
+        
+    task.content = markdown.markdown(task.content, extensions=['fenced_code', 'tables'])
     images = [{'id': img.id, 'base64': img.image} for img in existing_images]
     return render_template('update.html', task=task, images=images)
         
